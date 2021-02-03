@@ -1,0 +1,3 @@
+#!/usr/bin/false
+## Overlay on "go run arg1 argn" commands
+GOOS=linux

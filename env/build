@@ -1,2 +1,3 @@
+#!/usr/bin/false
+## Overlay on "go build arg1 argn" commands
 GOOS=darwin
-GOARCH=amd64

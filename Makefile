@@ -6,18 +6,17 @@ MARKDOWN := mbentley/grip@sha256:8f29196870e8c03bccd82d0de256cc1532705bda8e6072b
 dist: README.md src
 # build dist target to be linked against
 	$(call logger ,enter)
-	mkdir -p "$@" "$@"/src
+	mkdir -p "$@" "$@"/{src,tmp,env}
 	ln -f ./src/main.sh $@/go
-	ln -f ./README.md $@
 	ln -f ./src/common.sh $@/src
 	cp -lrf ./env $@
 
+install: export GOBIN=$(PWD)/dist
+install: export TMPDIR?=$(PWD)/dist/tmp
 install: dist
-# push dist onto PATH as inline declaration to exec a new shell
-		$(call logger ,enter)
-		PATH=$(PWD)/dist:$(PATH) \
-		GOENV=$(PWD)/dist/env/base \
-			exec $(SHELL) -i
+# push GOBIN onto PATH as inline declaration to exec a new shell
+	$(call logger ,enter)
+	PATH=$(GOBIN):$$PATH exec $(SHELL) -i 3>&-
 
 clean:
 # clean target

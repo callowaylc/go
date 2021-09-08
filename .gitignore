@@ -1,6 +1,8 @@
 *
 !*/**
 !.gitignore
+!README.md
+!Makefile
 !env
 !src
 !example

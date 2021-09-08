@@ -10,7 +10,7 @@ set -eu
 
 argv=$@
 action=$1 # go $action arg [argn], eg "go build path/to/source"
-env="$( tmppath env )" # path to composite env, eg dist/tmp/$$/$name.xxx
+composite=$( mktemp -ut "env.XXX" )
 
 ## main
 logger -sp DEBUG "Main" -- \
@@ -18,26 +18,27 @@ logger -sp DEBUG "Main" -- \
 	"goenv=$GOENV" \
 	"version=$VERSION" \
 	"action=$action" \
-	"composite=$env" \
+	"composite=$composite" \
 	"argv=$(enc "$@")"
 
 # deterministic merge of dotenv (like) files with the latter-most taking
 # precedence; invalid paths and duplicates have no effect on result set.
-dirname $env | xargs mkdir -pv >&3 2>&1
-cat $GOENV $GOBIN/env/base $GOBIN/env/$action 2>&3 \
+cat $GOBIN/env/$action $GOBIN/env/base $GOENV 2>&3 \
 	| sort -u -t"=" -k"1,1" \
-	| tee $env >&3
+	| tee $composite $GOBIN/env/composite >&3
 
-cat <<eof | tee /dev/fd/3 | sh -eu
-docker run \
-	-i \
-	--rm \
-	--env "CONTAINER=true" \
-	--env "DOCKER=true" \
-	--env-file $env \
-	--volume "$PWD:/opt/main:rw" \
-	--volume "$env:/root/.config/go/env" \
-	--workdir /opt/main \
-golang:$VERSION go ${@:-help}
-
+sh -euc "
+$(cat <<eof | tee /dev/fd/3
+	docker run \
+		-it \
+		--rm \
+		--env "CONTAINER=true" \
+		--env "DOCKER=true" \
+		--env-file $env \
+		--volume "$PWD:/opt/main:rw" \
+		--volume "$GOBIN/env/composite:/root/.config/go/env" \
+		--workdir /opt/main \
+	golang:$VERSION go ${@:-help}
 eof
+)"
+

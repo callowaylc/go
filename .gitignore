@@ -1,1 +1,6 @@
-dist
+*
+!*/**
+!.gitignore
+!env
+!src
+!example

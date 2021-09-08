@@ -7,8 +7,10 @@
 GOOS=
 GOARCH=
 
-# Declare variable and use value exported to local environment
-FUBAR
+# Declare variable and use value exported to local
+# environment, if any
+HELLO
 
 # Declare variable and assign value
 FRANKIE=heart
+FUBAR=rabuf
